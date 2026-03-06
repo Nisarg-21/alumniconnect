@@ -1,0 +1,4 @@
+alumni-backend/.env
+alumni-backend/node_modules
+alumni-connect/node_modules
+alumni-connect/.env
