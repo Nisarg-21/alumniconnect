@@ -97,7 +97,6 @@ export function Fundraising() {
   );
 }
 
-// ── AI Recommender (wired to Groq via backend) ──
 import { useState, useRef, useEffect } from 'react';
 import { chatApi } from '../../api';
 
@@ -112,7 +111,6 @@ export function AIRecommender() {
   const [error, setError]                 = useState(null);
   const boxRef                            = useRef(null);
 
-  // Auto-scroll chat to bottom
   useEffect(() => {
     if (boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight;
   }, [displayMsgs, loading]);
@@ -123,13 +121,11 @@ export function AIRecommender() {
 
     const userMsg = { role: 'user', content: text };
 
-    // Optimistically show user message
     setDisplayMsgs(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
     setError(null);
 
-    // Build full message history for API
     const newHistory = [...messages, userMsg];
 
     try {
@@ -201,7 +197,7 @@ export function AIRecommender() {
           </div>
         </div>
 
-        {/* Recommended alumni panel */}
+        {}
         <div className="card">
           <div style={{ fontWeight: 700, color: 'var(--forest)', marginBottom: 13 }}>✨ Recommended Alumni</div>
 

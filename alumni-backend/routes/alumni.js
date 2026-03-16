@@ -2,20 +2,7 @@ const express    = require('express');
 const { db }     = require('../db/connection');
 const router     = express.Router();
 
-/**
- * GET /api/alumni/search
- *
- * Query params (all optional):
- *   q          – free-text search across name, company, job_role
- *   branch     – e.g. "CS" | "ECE" | "MECH" | "CIVIL" | "MBA" | "EEE"
- *   batch      – graduation year, e.g. "2020"
- *   location   – e.g. "Bangalore"
- *   job_type   – e.g. "Software Engineer"
- *   company    – e.g. "Google"
- *   experience – e.g. "0-2" | "3-5" | "5-10" | "10+"
- *   page       – page number (default 1)
- *   limit      – results per page (default 12)
- */
+
 router.get('/search', (req, res) => {
   try {
     const {
@@ -33,7 +20,6 @@ router.get('/search', (req, res) => {
     const conditions = [];
     const params     = [];
 
-    // Free-text search across name, company, job_role
     if (q.trim()) {
       conditions.push('(LOWER(a.name) LIKE ? OR LOWER(a.company) LIKE ? OR LOWER(a.job_role) LIKE ?)');
       const like = `%${q.trim().toLowerCase()}%`;
@@ -65,7 +51,7 @@ router.get('/search', (req, res) => {
       params.push(`%${company.toLowerCase()}%`);
     }
 
-    // Experience range filter
+    
     if (experience && experience !== 'Experience') {
       if (experience === '0-2')  { conditions.push('a.experience_years BETWEEN 0 AND 2'); }
       if (experience === '3-5')  { conditions.push('a.experience_years BETWEEN 3 AND 5'); }
@@ -76,14 +62,13 @@ router.get('/search', (req, res) => {
     const where  = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    // Count total for pagination
+    
     const totalRow = db.prepare(`
       SELECT COUNT(*) as total
       FROM Alumni_Student a
       ${where}
     `).get(...params);
 
-    // Fetch page of results
     const rows = db.prepare(`
       SELECT
         a.rollno,
@@ -105,7 +90,6 @@ router.get('/search', (req, res) => {
       LIMIT ? OFFSET ?
     `).all(...params, parseInt(limit), offset);
 
-    // Build chips for each alumni card
     const withChips = rows.map(r => ({
       ...r,
       chips: [
@@ -113,9 +97,7 @@ router.get('/search', (req, res) => {
         r.is_hiring  ? 'Hiring'          : null,
         r.num_connections > 3 ? 'Open to connect' : null,
       ].filter(Boolean),
-      // Initials for avatar
       av: r.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
-      // Experience label
       exp: `${r.experience_years} yr${r.experience_years !== 1 ? 's' : ''}`,
     }));
 
@@ -133,10 +115,7 @@ router.get('/search', (req, res) => {
   }
 });
 
-/**
- * GET /api/alumni/filters
- * Returns distinct values for each filter dropdown, built from real DB data
- */
+
 router.get('/filters', (_req, res) => {
   try {
     const branches   = db.prepare('SELECT DISTINCT branch   FROM Alumni_Student WHERE branch   IS NOT NULL ORDER BY branch').all().map(r => r.branch);
@@ -152,10 +131,7 @@ router.get('/filters', (_req, res) => {
   }
 });
 
-/**
- * GET /api/alumni/:rollno
- * Single alumni profile
- */
+
 router.get('/:rollno', (req, res) => {
   try {
     const row = db.prepare('SELECT * FROM Alumni_Student WHERE rollno = ?').get(req.params.rollno);

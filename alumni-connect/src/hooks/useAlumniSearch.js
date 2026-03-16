@@ -23,14 +23,12 @@ export function useAlumniSearch() {
 
   const debounceRef = useRef(null);
 
-  // Load filter dropdown options once on mount
   useEffect(() => {
     alumniApi.getFilters()
       .then(setFilterOpts)
       .catch(err => console.error('Failed to load filters:', err));
   }, []);
 
-  // Fetch results whenever filters or page change (debounced)
   const doSearch = useCallback(() => {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
@@ -53,7 +51,7 @@ export function useAlumniSearch() {
 
   function updateFilter(key, value) {
     setFilters(prev => ({ ...prev, [key]: value }));
-    setPage(1); // reset to first page on any filter change
+    setPage(1); // 
   }
 
   function clearFilters() {

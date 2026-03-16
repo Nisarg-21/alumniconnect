@@ -3,20 +3,17 @@ const { db }  = require('../db/connection');
 const router  = express.Router();
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const MODEL        = 'llama-3.3-70b-versatile'; // free on Groq, very capable
+const MODEL        = 'llama-3.3-70b-versatile'; 
 
-// ── Helper: pull relevant alumni from DB based on user message ──
 function getRelevantAlumni(userMessage) {
   const msg = userMessage.toLowerCase();
 
-  // Extract keywords to search for
   const keywords = msg
     .replace(/[^a-z0-9 ]/g, ' ')
     .split(' ')
     .filter(w => w.length > 3)
     .filter(w => !['what', 'where', 'when', 'who', 'how', 'want', 'need', 'like', 'help', 'tell', 'find', 'looking', 'interested', 'should', 'would', 'could', 'please', 'about', 'with', 'that', 'this', 'they', 'them', 'have', 'from', 'into', 'will'].includes(w));
 
-  // Try DB search across company, job_role, branch, location
   let alumni = [];
 
   if (keywords.length > 0) {
@@ -39,7 +36,6 @@ function getRelevantAlumni(userMessage) {
     }
   }
 
-  // Fallback: just return top mentors if no keyword match
   if (alumni.length === 0) {
     alumni = db.prepare(`
       SELECT name, job_role, company, location, branch, batch, experience_years, is_mentor, num_connections
@@ -60,12 +56,7 @@ function formatAlumniContext(alumni) {
   ).join('\n');
 }
 
-/**
- * POST /api/chat
- * Body: { messages: [{ role: 'user'|'assistant', content: string }] }
- *
- * Streams are not used here for simplicity — returns full response.
- */
+
 router.post('/', async (req, res) => {
   try {
     const { messages } = req.body;
@@ -84,7 +75,6 @@ router.post('/', async (req, res) => {
     const relevantAlumni = getRelevantAlumni(latestUserMsg);
     const alumniContext  = formatAlumniContext(relevantAlumni);
 
-    // System prompt — gives the AI its personality + injects live DB data
     const systemPrompt = `You are AlumniConnect AI, a helpful career advisor for a university alumni networking platform.
 
 You have access to the following alumni profiles from the database that are relevant to this conversation:
@@ -125,7 +115,6 @@ Your job:
 
     res.json({
       reply,
-      // Send back which alumni were injected as context (useful for frontend "Recommended" panel)
       context_alumni: relevantAlumni.map(a => ({
         name:    a.name,
         role:    a.job_role,

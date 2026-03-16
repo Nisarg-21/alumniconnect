@@ -16,7 +16,7 @@ export default function Login({ onLogin, onBack }) {
 
         try {
             const { user } = await authApi.login(email, password);
-            onLogin(user); // Automatically detects and sets role
+            onLogin(user); 
         } catch (err) {
             setError(err.message || 'Login failed Check your credentials and try again.');
         } finally {

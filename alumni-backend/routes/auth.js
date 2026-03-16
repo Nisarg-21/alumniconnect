@@ -3,12 +3,7 @@ const crypto     = require('crypto');
 const { db }     = require('../db/connection');
 const router     = express.Router();
 
-/**
- * POST /api/auth/login
- * Body: { email, password }
- *
- * Uses SHA-256 as documented in the DB README.
- */
+
 router.post('/login', (req, res) => {
   try {
     const { email, password } = req.body;
@@ -17,7 +12,7 @@ router.post('/login', (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    // Hash the incoming password with SHA-256 (matches DB hashing method)
+    
     const hash = crypto.createHash('sha256').update(password).digest('hex');
 
     const loginRow = db.prepare('SELECT * FROM Login WHERE email = ?').get(email);
@@ -42,7 +37,6 @@ router.post('/login', (req, res) => {
         role:  loginRow.role,
         name:  profile?.name || 'User',
         ...(profile || {}),
-        // Never send the hash back
         password_hash: undefined,
       },
     });

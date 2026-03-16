@@ -4,10 +4,7 @@ const path = require('path');
 
 const DB_PATH = path.join(__dirname, '..', 'db', 'database.db');
 
-// sql.js loads the entire DB into memory from the .db file.
-// We expose a thin wrapper that mimics the better-sqlite3 API
-// (.prepare().all() / .prepare().get() / .prepare().run())
-// so the route files need zero changes.
+
 
 let _db = null;
 
@@ -20,14 +17,12 @@ async function getDb() {
   return _db;
 }
 
-// Synchronous helper used by routes — works because we call initDb()
-// at server startup and await it before listening.
+
 function getDbSync() {
   if (!_db) throw new Error('Database not initialised yet — call initDb() first');
   return _db;
 }
 
-// Thin compatibility shim: db.prepare(sql).all(...params)  /  .get(...params)  /  .run(...params)
 function makeDb() {
   return {
     prepare(sql) {
@@ -57,7 +52,6 @@ function makeDb() {
         },
       };
     },
-    // Allow direct sql execution (used nowhere currently but handy)
     exec(sql) {
       getDbSync().run(sql);
     },

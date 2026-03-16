@@ -2,14 +2,7 @@ const express    = require('express');
 const { db }     = require('../db/connection');
 const router     = express.Router();
 
-/**
- * GET /api/directory
- *
- * Query params:
- *   sort_by  – "branch" | "batch" | "job_type" (default "batch")
- *   page     – page number (default 1)
- *   limit    – results per page (default 20)
- */
+
 router.get('/', (req, res) => {
   try {
     const { sort_by = 'batch', page = 1, limit = 20 } = req.query;
@@ -43,7 +36,6 @@ router.get('/', (req, res) => {
       LIMIT ? OFFSET ?
     `).all(parseInt(limit), offset);
 
-    // Branch counts for the top summary row
     const branchCounts = db.prepare(`
       SELECT branch, COUNT(*) as count
       FROM Alumni_Student

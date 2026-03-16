@@ -20,7 +20,7 @@ function useTypewriter(text, delay = 300) {
 export default function Dashboard({ role, user, onOpenModal, onNavigate }) {
   const particlesRef = useRef(null);
 
-  // Get name directly - no typewriter on dynamic values
+  // Get name directly 
   let displayName = 'there';
   if (user && user.name && typeof user.name === 'string') {
     displayName = user.name;
